@@ -11,7 +11,7 @@ import { nftAddress, nftMarketAddress } from '../config';
 import NFT from '../artifacts/contracts/InLightNFT.sol/InLightNFT.json';
 import Market from '../artifacts/contracts/InLightMarket.sol/InLightMarket.json';
 
-export default function CreateItem() {
+export default function CreateMeditation() {
   const [fileUrl, setFileUrl] = useState(null);
   const [formInput, updateFormInput] = useState({
     price: '',
@@ -60,13 +60,22 @@ export default function CreateItem() {
     const provider = new ethers.providers.Web3Provider(connection);
     const signer = provider.getSigner();
 
+    debugger;
     /* next, create the item */
     const contract = new ethers.Contract(nftAddress, NFT.abi, signer);
     const transaction = await contract.createToken(url);
     const tx = await transaction.wait();
+    if (tx.events.length < 1) {
+      console.error('tx has no events. tx: ', tx);
+      return;
+    }
     const event = tx.events[0];
+    console.log('tx: ', tx);
+    console.log('tx.events: ', tx.events);
+    console.log('event: ', event);
     const value = event.args[2];
     const tokenId = value.toNumber();
+
     const price = ethers.utils.parseUnits(formInput.price, 'ether');
 
     /* then list the item for sale on the marketplace */
@@ -83,7 +92,7 @@ export default function CreateItem() {
 
   return (
     <div className="flex justify-center">
-      <div className="w-12 flex flex-col pb-12">
+      <div className="w-1/2 flex flex-col pb-12">
         <input
           type="text"
           placeholder="Asset Name"
@@ -95,7 +104,7 @@ export default function CreateItem() {
         <textarea
           type="text"
           placeholder="Asset Description"
-          className="mt-8 border rounded p-4"
+          className="mt-2 border rounded p-4"
           onChange={(e) =>
             updateFormInput({ ...formInput, description: e.target.value })
           }
@@ -103,7 +112,7 @@ export default function CreateItem() {
         <input
           type="text"
           placeholder="Asset Price in Eth"
-          className="mt-8 border rounded p-4"
+          className="mt-2 border rounded p-4"
           onChange={(e) =>
             updateFormInput({ ...formInput, price: e.target.value })
           }

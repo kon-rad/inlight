@@ -16,17 +16,23 @@ export default function Home() {
   }, []);
 
   async function loadNFTs() {
+    debugger;
     /* create a generic provider and query for unsold market items */
     const provider = new ethers.providers.JsonRpcProvider();
     const tokenContract = new ethers.Contract(nftAddress, NFT.abi, provider);
-    const marketContract = new ethers.Contract(nftMarketAddress);
+    const marketContract = new ethers.Contract(
+      nftMarketAddress,
+      Market.abi,
+      provider
+    );
     const data = await marketContract.fetchMarketItems();
+    console.log('data: ', data);
 
     /* map over items returned from smart contract and format
      * them as  well as fetch their token metadata
      */
     const items = await Promise.all(
-      data.map(async (i) => {
+      (data || []).map(async (i) => {
         const tokenUri = await tokenContract.tokenURI(i.tokenId);
         const meta = await axios.get(tokenUri);
         const price = ethers.utils.formatUnits(i.price.toString(), 'ether');

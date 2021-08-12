@@ -6,9 +6,9 @@ import Web3Modal from 'web3modal';
 import { nftMarketAddress, nftAddress } from '../config';
 
 import Market from '../artifacts/contracts/InLightMarket.sol/InLightMarket.json';
-import NFT from '../artifacts/contracts/InLightNFT.sol/InLightNFT.dbg.json';
+import NFT from '../artifacts/contracts/InLightNFT.sol/InLightNFT.json';
 
-export default function MyAssets() {
+export default function MeditationDashboard() {
   const [nfts, setNfts] = useState([]);
   const [loadingState, setLoadingState] = useState('not-loaded');
   useEffect(() => {
@@ -28,6 +28,7 @@ export default function MyAssets() {
       Market.abi,
       signer
     );
+    debugger;
     const tokenContract = new ethers.Contract(nftAddress, NFT.abi, provider);
     const data = await marketContract.fetchMyNFTs();
 
@@ -50,7 +51,7 @@ export default function MyAssets() {
     setLoadingState('loaded');
   }
   if (loadingState === 'loaded' && !nfts.length) {
-    return <h1 className="py-10 px-20 text-3xl">No assets owned</h1>;
+    return <h1 className="py-10 px-20 text-3xl">No meditations owned</h1>;
   }
   return (
     <div className="flex justify-center">
