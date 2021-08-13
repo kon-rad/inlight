@@ -62,8 +62,8 @@ export default function CreateMeditation() {
 
     debugger;
     /* next, create the item */
-    const contract = new ethers.Contract(nftAddress, NFT.abi, signer);
-    const transaction = await contract.createToken(url);
+    let contract = new ethers.Contract(nftAddress, NFT.abi, signer);
+    let transaction = await contract.createToken(url);
     const tx = await transaction.wait();
     if (tx.events.length < 1) {
       console.error('tx has no events. tx: ', tx);
@@ -79,7 +79,7 @@ export default function CreateMeditation() {
     const price = ethers.utils.parseUnits(formInput.price, 'ether');
 
     /* then list the item for sale on the marketplace */
-    contract = new ethers.Contract(nftMarketAddress, Market.abi, singer);
+    contract = new ethers.Contract(nftMarketAddress, Market.abi, signer);
     let listingPrice = await contract.getListingPrice();
     listingPrice = listingPrice.toString();
 

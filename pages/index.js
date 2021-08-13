@@ -36,6 +36,7 @@ export default function Home() {
         const tokenUri = await tokenContract.tokenURI(i.tokenId);
         const meta = await axios.get(tokenUri);
         const price = ethers.utils.formatUnits(i.price.toString(), 'ether');
+        console.log('meta: ', meta);
         const item = {
           price,
           tokenId: i.tokenId.toNumber(),
@@ -51,16 +52,16 @@ export default function Home() {
     setNfts(items);
     setLoadingState('loaded');
   }
-
   async function buyNft(nft) {
-    /* needs the user to sign the transaction, so will use Web3Provider and sign it */
+    debugger;
+
     const web3Modal = new Web3Modal();
     const connection = await web3Modal.connect();
     const provider = new ethers.providers.Web3Provider(connection);
     const signer = provider.getSigner();
     const contract = new ethers.Contract(nftMarketAddress, Market.abi, signer);
+    debugger;
 
-    /* user will be prompted to pay the asking price to complete the transaction */
     const price = ethers.utils.parseUnits(nft.price.toString(), 'ether');
     const transaction = await contract.createMarketSale(
       nftAddress,
@@ -72,7 +73,6 @@ export default function Home() {
     await transaction.wait();
     loadNFTs();
   }
-
   if (loadingState === 'loaded' && !nfts.length) {
     return <h1 className="px-20 py-10 text-3xl">No items in marketplace</h1>;
   }
@@ -81,7 +81,7 @@ export default function Home() {
       <div className="px-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
           {nfts.map((nft, i) => (
-            <div className="border shadow rounded-xl overflow-hidden">
+            <div className="border shadow rounded-xl overflow-hidden mb-4 mt-2">
               <img src={nft.image} alt="" />
               <div className="p-4">
                 <p className="text-2xl font-semibold">{nft.name}</p>
