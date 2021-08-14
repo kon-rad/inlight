@@ -1,0 +1,73 @@
+
+.navigation  {
+  background: white;
+}
+.header__icon {
+  width: 100px;
+  height: 100px;
+}
+.header__container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+@media screen and (max-width: 785px) {
+  .app__container {
+    margin-bottom: 140px;
+  }
+  .navigation {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    left: 0;
+  }
+  .navigation div {
+    flex-grow: 1;
+  }
+}
+
+/* InlineEdit Component */
+
+/* these make sure it can work in any text element */
+.inline-text_copy--active,
+.inline-text_input--active {
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  padding: 0;
+  background: none;
+  border: none;
+  border-bottom: 1px dashed var(--gray-400);
+  outline: none;
+}
+.inline-text_copy {
+  display: inline-block;
+  height: 25px;
+}
+.inline-text_copy--empty {
+  width: 140px;
+  border-bottom: solid 1px var(--gray-400);
+}
+
+.inline-text_copy--active {
+  cursor: pointer;
+}
+
+.inline-text_copy--hidden,
+.inline-text_input--hidden {
+  display: none;
+}
+
+.inline-text_input--active {
+  border-bottom: 1px solid var(--gray-400);
+  text-align: left;
+}
+.inline-text_input {
+  width: 140px;
+  height: 25px;
+}
+.inline-text {
+  height: 30px;
+}

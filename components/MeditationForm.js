@@ -1,0 +1,84 @@
+import { useState, useEffect } from 'react';
+import InlineEdit from './InlineEdit';
+import { useContext } from 'react';
+import { UserContext } from './userContext';
+import generateAvatar from 'github-like-avatar-generator';
+
+const MeditationForm = ({ duration, startTimeStamp, endTimeStamp }) => {
+  const [desc, setDesc] = useState('');
+  const [avatar, setAvatar] = useState(null);
+  const { user, setUser } = useContext(UserContext);
+  const handleSetText = (key, val) => {
+    const newUser = {
+      ...user,
+      [key]: val,
+    };
+    setUser(newUser);
+  };
+
+  const handleChangeDescription = (e) => {
+    setDesc(e.target.value);
+  };
+  const handleImageUpload = (e) => {
+    console.log(e);
+  };
+  useEffect(() => {
+    let newAvatar = generateAvatar({
+      blocks: 6,
+      width: 100,
+    });
+    setAvatar(newAvatar);
+  }, []);
+  console.log('avatar: ', avatar);
+  return (
+    <div className="mt-2">
+      <div className="mb-2">
+        <h3 className="text-lg font-bold mb-2">Meditation:</h3>
+        <div className="flex flex-col">
+          <div className="flex mb-1">
+            <div className="text-sm bold mr-2">Duration:</div>
+            <div className="text-sm">{duration}</div>
+          </div>
+          <div className="flex mb-1">
+            <div className="text-sm bold mr-2">Start Time Stamp:</div>
+            <div className="text-xs">{startTimeStamp}</div>
+          </div>
+          <div className="flex mb-1">
+            <div className="text-sm bold mr-2">End Time Stamp:</div>
+            <div className="text-xs">{endTimeStamp}</div>
+          </div>
+          <div className="flex mb-1 flex-col">
+            <div className="text-sm bold mr-2">Description:</div>
+            <textarea
+              value={desc}
+              onChange={handleChangeDescription}
+              className="MeditationForm__description rounded border mb-2 p-2 text-sm"
+              placeholder="Any observations or notes?"
+            />
+          </div>
+          <div className="flex flex-col mb-1">
+            <div className="flex justify-between mb-2">
+              <div className="flex flex-col">
+                <div className="text-sm bold mr-2">Image:</div>
+                <div className="text-xs text-gray-400 ">
+                  It can be an image of your meditation space or anything you
+                  like
+                </div>
+              </div>
+              <button
+                onClick={handleImageUpload}
+                className="bg-white text-black border-black border rounded-full py-1 px-4 shadow-lg self-start"
+              >
+                upload
+              </button>
+            </div>
+
+            {/* <div id="generatedAvatar">{avatar && avatar.svgElement}</div> */}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default MeditationForm;

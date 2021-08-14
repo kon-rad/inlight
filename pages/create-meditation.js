@@ -3,6 +3,10 @@ import { ethers } from 'ethers';
 import { create as ipfsHttpClient } from 'ipfs-http-client';
 import { useRouter } from 'next/router';
 import Web3Modal from 'web3modal';
+import Header from '../components/Header';
+import Icon from '../components/Icon';
+import UserDataForm from '../components/UserDataForm';
+import MeditationForm from '../components/MeditationForm';
 
 const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0');
 
@@ -11,12 +15,30 @@ import { nftAddress, nftMarketAddress } from '../config';
 import NFT from '../artifacts/contracts/InLightNFT.sol/InLightNFT.json';
 import Market from '../artifacts/contracts/InLightMarket.sol/InLightMarket.json';
 
+const Stages = {
+  START: 'START',
+  IN_PROGRESS: 'IN_PROGRESS',
+  COMPLETED: 'COMPLETED',
+};
 export default function CreateMeditation() {
   const [fileUrl, setFileUrl] = useState(null);
+  const [stage, setStage] = useState(Stages.START);
+  const [time, setTime] = useState(1);
+  const [initialTime, setInitialTime] = useState(600);
+  const [timeElapsed, setTimeElapsed] = useState(0);
+  const [startTimeStamp, setStartTimeStamp] = useState('');
+  const [endTimeStamp, setEndTimeStamp] = useState('');
+  const [clock, setClock] = useState(null);
   const [formInput, updateFormInput] = useState({
     price: '',
     name: '',
     description: '',
+    firstName: '',
+    lastName: '',
+    duration: '',
+    latitude: '',
+    longitude: '',
+    timeStamp: '',
   });
   const router = useRouter();
 
@@ -47,7 +69,7 @@ export default function CreateMeditation() {
     try {
       const added = await client.add(data);
       const url = `https://ipfs.infura.io/ipfs/${added.path}`;
-      /* after file is uploaded to IPFS, pass teh URL to save it on blockchain */
+      /* after file is uploaded to IPFS, pass the URL to save it on blockchain */
       createSale(url);
     } catch (error) {
       console.log(`Error uploading file: ${error}`);
@@ -90,6 +112,87 @@ export default function CreateMeditation() {
     router.push('/');
   }
 
+  function tick() {
+    if (time - 1 <= 0) {
+      clearInterval(clock);
+      setClock(null);
+      setTime(0);
+      setStage(Stages.COMPLETED);
+      setEndTimeStamp(new Date().toISOString());
+    } else {
+      setTime((time) => time - 1);
+    }
+  }
+
+  function startTimer() {
+    console.log('clock: ', clock);
+    if (clock) {
+      clearInterval(clock);
+      setClock(null);
+      return;
+    }
+    setStartTimeStamp(new Date().toISOString());
+    const newClock = setInterval(tick, 1000);
+    console.log('setting newClock: ', newClock);
+    setClock((clock) => newClock);
+  }
+
+  const secondsToMMSS = (time) => {
+    const m = Math.floor(time / 60);
+    let s = time % 60;
+    s = s < 10 ? `0${s}` : s;
+    return `${m}:${s}`;
+  };
+
+  if (stage === Stages.START) {
+    return (
+      <div>
+        <Header icon="meditate" title="Meditate" />
+        <div className="flex justify-center">
+          <div className="w-1/2 flex flex-col pb-12">
+            <div className="timer flex justify-center items-center">
+              <span className="timer__time text-4xl font-bold text-center">
+                {secondsToMMSS(time)}
+              </span>
+            </div>
+            <div className="flex items-center justify-evenly">
+              <button
+                onClick={() => startTimer(clock)}
+                className="font-bold bg-green-400 text-white rounded-full py-3 px-6 shadow-lg"
+              >
+                Start
+              </button>
+              <Icon name="volume-up" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (stage === Stages.COMPLETED) {
+    return (
+      <div className="flex flex-col p-5">
+        <div className="text-2xl font-bold mt-4 text-center">
+          Completed <br />
+          {secondsToMMSS(initialTime)}
+        </div>
+        <div className="p-4 mt-3">
+          <UserDataForm />
+          <MeditationForm
+            startTimeStamp={startTimeStamp}
+            endTimeStamp={endTimeStamp}
+            duration={secondsToMMSS(initialTime)}
+          />
+        </div>
+        <button
+          onClick={createMarket}
+          className="font-bold mt-4 bg-green-400 text-white rounded p-4 shadow-lg"
+        >
+          Create Meditation Asset
+        </button>
+      </div>
+    );
+  }
   return (
     <div className="flex justify-center">
       <div className="w-1/2 flex flex-col pb-12">
@@ -121,7 +224,7 @@ export default function CreateMeditation() {
         {fileUrl && <img className="rounded mt-4" width="350" src={fileUrl} />}
         <button
           onClick={createMarket}
-          className="font-bold mt-4 bg-pink-500 text-white rounded p-4 shadow-lg"
+          className="font-bold mt-4 bg-green-400 text-white rounded p-4 shadow-lg"
         >
           Create Digital Asset
         </button>

@@ -1,28 +1,45 @@
-import '../styles/globals.css';
+import { useState } from 'react';
 import Link from 'next/link';
+import Icon from '../components/Icon';
+import { UserProvider, userState } from '../components/userContext';
+import useLocalStorage from '../hooks/useLocalStorage';
+
+import '../styles/globals.css';
+import './app.css';
 
 function MyApp({ Component, pageProps }) {
+  const [user, setUser] = useLocalStorage('inLightMeditationUser', userState);
+
   return (
-    <div>
-      <nav className="border-b p-6">
-        <p className="text-4xl font-bold">InLight Meditation Marketplace</p>
-        <div className="flex mt-4">
-          <Link href="/">
-            <a className="mr-4 text-pink-500">Home</a>
-          </Link>
-          <Link href="/create-meditation">
-            <a className="mr-6 text-pink-500">Meditation</a>
-          </Link>
-          <Link href="/my-meditations">
-            <a className="mr-6 text-pink-500">My Meditations</a>
-          </Link>
-          <Link href="/meditations-dashboard">
-            <a className="mr-6 text-pink-500">Meditations Dashboard</a>
-          </Link>
-        </div>
-      </nav>
-      <Component {...pageProps} />
-    </div>
+    <UserProvider value={{ user, setUser }}>
+      <div className="app__container">
+        <nav className="navigation border-b p-6">
+          <div className="flex mt-4 justify-evenly items-center">
+            <Link href="/">
+              <a className="mr-4 text-green-400 text-sm">
+                <Icon name={'store'} className={'green-400'} />
+              </a>
+            </Link>
+            <Link href="/create-meditation">
+              <a className="mr-4 text-green-400 text-sm">
+                <Icon name={'meditate'} className={'green-400'} />
+              </a>
+            </Link>
+            <Link href="/my-meditations">
+              <a className="mr-4 text-green-400 text-sm">
+                <Icon name={'list'} className={'green-400'} />
+              </a>
+            </Link>
+            <Link href="/meditations-dashboard">
+              <a className="mr-4 text-green-400 text-sm">
+                <Icon name={'user'} className={'green-400'} />
+              </a>
+            </Link>
+          </div>
+        </nav>
+        <Component {...pageProps} />
+      </div>
+    </UserProvider>
   );
 }
 
