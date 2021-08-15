@@ -10,6 +10,7 @@ const MeditationForm = ({
   startTimeStamp,
   endTimeStamp,
   onImageUpload,
+  fileUrl,
 }) => {
   const [desc, setDesc] = useState('');
   const [avatar, setAvatar] = useState(null);
@@ -37,6 +38,15 @@ const MeditationForm = ({
     setAvatar(newAvatar);
     setAvatarImage(image);
   }, []);
+  const renderImage = () => {
+    if (fileUrl) {
+      return <img className="rounded mt-4" width="350" src={fileUrl} />;
+    }
+    return avatarImage;
+  };
+  const useGenerated = () => {
+    onImageUpload(null);
+  };
   return (
     <div className="mt-2">
       <div className="mb-2">
@@ -71,15 +81,21 @@ const MeditationForm = ({
                   It can be an image of your meditation space or anything you
                   like
                 </div>
+                <input
+                  type="file"
+                  name="Asset"
+                  className="self-start mt-2"
+                  onChange={onImageUpload}
+                />
+                <button
+                  className="mt-2 bg-white text-black border-black border rounded-full py-1 px-4 shadow-lg self-start"
+                  onClick={useGenerated}
+                >
+                  use generated image
+                </button>
               </div>
-              <button
-                onClick={onImageUpload}
-                className="bg-white text-black border-black border rounded-full py-1 px-4 shadow-lg self-start"
-              >
-                upload
-              </button>
             </div>
-            {avatarImage}
+            {renderImage()}
           </div>
         </div>
       </div>

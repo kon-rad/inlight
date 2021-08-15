@@ -28,6 +28,12 @@
   }
 }
 
+.meditation__checkmark {
+  margin: 0 auto;
+  width: 50px;
+  height: 50px;
+}
+
 /* InlineEdit Component */
 
 /* these make sure it can work in any text element */

@@ -58,6 +58,10 @@ export default function CreateMeditation() {
   );
 
   async function handleImageUpload(e) {
+    if (!e || !e.target || !e.target.files || !e.target.files[0]) {
+      setFileUrl(null);
+      return;
+    }
     const file = e.target.files[0];
     try {
       const added = await client.add(file, {
@@ -173,6 +177,11 @@ export default function CreateMeditation() {
         <div className="text-2xl font-bold mt-4 text-center">
           Completed <br />
           {secondsToMMSS(initialTime)}
+          <Icon
+            name="checkmark"
+            svgClassName="meditation__checkmark"
+            fill="#34D399"
+          />
         </div>
         <div className="p-4 mt-3">
           <UserDataForm />
@@ -181,6 +190,7 @@ export default function CreateMeditation() {
             endTimeStamp={endTimeStamp}
             duration={secondsToMMSS(initialTime)}
             onImageUpload={handleImageUpload}
+            fileUrl={fileUrl}
           />
         </div>
         <button
@@ -219,8 +229,6 @@ export default function CreateMeditation() {
             updateFormInput({ ...formInput, price: e.target.value })
           }
         />
-        <input type="file" name="Asset" className="my-4" onChange={onChange} />
-        {fileUrl && <img className="rounded mt-4" width="350" src={fileUrl} />}
         <button
           onClick={createMarket}
           className="font-bold mt-4 bg-green-400 text-white rounded p-4 shadow-lg"

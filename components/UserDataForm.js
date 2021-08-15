@@ -65,7 +65,6 @@ const UserDataForm = () => {
       console.log('Not Available');
     }
   };
-  console.log('user latitude: ', user.latitude);
   return (
     <div className="mt-2">
       <div className="mb-2">
