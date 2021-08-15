@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import InlineEdit from './InlineEdit';
 import { useContext } from 'react';
 import { UserContext } from './userContext';
-import generateAvatar from 'github-like-avatar-generator';
+import generateAvatar from '../utilities/generateAvatar';
 
 const MeditationForm = ({ duration, startTimeStamp, endTimeStamp }) => {
   const [desc, setDesc] = useState('');
   const [avatar, setAvatar] = useState(null);
+  const [avatarImage, setAvatarImage] = useState(null);
   const { user, setUser } = useContext(UserContext);
   const handleSetText = (key, val) => {
     const newUser = {
@@ -27,9 +28,13 @@ const MeditationForm = ({ duration, startTimeStamp, endTimeStamp }) => {
       blocks: 6,
       width: 100,
     });
+    const image = React.createElement('img', {
+      src: newAvatar.base64,
+      className: 'mb-2',
+    });
     setAvatar(newAvatar);
+    setAvatarImage(image);
   }, []);
-  console.log('avatar: ', avatar);
   return (
     <div className="mt-2">
       <div className="mb-2">
@@ -72,8 +77,7 @@ const MeditationForm = ({ duration, startTimeStamp, endTimeStamp }) => {
                 upload
               </button>
             </div>
-
-            {/* <div id="generatedAvatar">{avatar && avatar.svgElement}</div> */}
+            {avatarImage}
           </div>
         </div>
       </div>
