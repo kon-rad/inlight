@@ -17,7 +17,6 @@ export default function Home() {
   }, []);
 
   async function loadNFTs() {
-    debugger;
     /* create a generic provider and query for unsold market items */
     const provider = new ethers.providers.JsonRpcProvider();
     const tokenContract = new ethers.Contract(nftAddress, NFT.abi, provider);
@@ -54,14 +53,11 @@ export default function Home() {
     setLoadingState('loaded');
   }
   async function buyNft(nft) {
-    debugger;
-
     const web3Modal = new Web3Modal();
     const connection = await web3Modal.connect();
     const provider = new ethers.providers.Web3Provider(connection);
     const signer = provider.getSigner();
     const contract = new ethers.Contract(nftMarketAddress, Market.abi, signer);
-    debugger;
 
     const price = ethers.utils.parseUnits(nft.price.toString(), 'ether');
     const transaction = await contract.createMarketSale(

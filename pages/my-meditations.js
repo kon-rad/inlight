@@ -29,7 +29,6 @@ export default function MyMeditations() {
       Market.abi,
       signer
     );
-    debugger;
     const tokenContract = new ethers.Contract(nftAddress, NFT.abi, provider);
     const data = await marketContract.fetchMyNFTs();
 

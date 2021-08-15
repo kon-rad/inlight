@@ -3,8 +3,14 @@ import InlineEdit from './InlineEdit';
 import { useContext } from 'react';
 import { UserContext } from './userContext';
 import generateAvatar from '../utilities/generateAvatar';
+import formatDate from '../utilities/formatDate';
 
-const MeditationForm = ({ duration, startTimeStamp, endTimeStamp }) => {
+const MeditationForm = ({
+  duration,
+  startTimeStamp,
+  endTimeStamp,
+  onImageUpload,
+}) => {
   const [desc, setDesc] = useState('');
   const [avatar, setAvatar] = useState(null);
   const [avatarImage, setAvatarImage] = useState(null);
@@ -16,12 +22,8 @@ const MeditationForm = ({ duration, startTimeStamp, endTimeStamp }) => {
     };
     setUser(newUser);
   };
-
   const handleChangeDescription = (e) => {
     setDesc(e.target.value);
-  };
-  const handleImageUpload = (e) => {
-    console.log(e);
   };
   useEffect(() => {
     let newAvatar = generateAvatar({
@@ -46,11 +48,11 @@ const MeditationForm = ({ duration, startTimeStamp, endTimeStamp }) => {
           </div>
           <div className="flex mb-1">
             <div className="text-sm bold mr-2">Start Time Stamp:</div>
-            <div className="text-xs">{startTimeStamp}</div>
+            <div className="text-xs">{formatDate(startTimeStamp)}</div>
           </div>
           <div className="flex mb-1">
             <div className="text-sm bold mr-2">End Time Stamp:</div>
-            <div className="text-xs">{endTimeStamp}</div>
+            <div className="text-xs">{formatDate(endTimeStamp)}</div>
           </div>
           <div className="flex mb-1 flex-col">
             <div className="text-sm bold mr-2">Description:</div>
@@ -71,7 +73,7 @@ const MeditationForm = ({ duration, startTimeStamp, endTimeStamp }) => {
                 </div>
               </div>
               <button
-                onClick={handleImageUpload}
+                onClick={onImageUpload}
                 className="bg-white text-black border-black border rounded-full py-1 px-4 shadow-lg self-start"
               >
                 upload

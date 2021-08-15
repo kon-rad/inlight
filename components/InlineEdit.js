@@ -25,6 +25,7 @@ function InlineEdit(props) {
   });
 
   const onEnter = useCallback(() => {
+    console.log('onenter: ', enter);
     if (enter) {
       onSetText(inputValue);
       setIsInputActive(false);
@@ -32,6 +33,7 @@ function InlineEdit(props) {
   }, [enter, inputValue, onSetText]);
 
   const onEsc = useCallback(() => {
+    console.log('onesc : ', esc, props.text);
     if (esc) {
       setInputValue(props.text);
       setIsInputActive(false);
@@ -46,6 +48,8 @@ function InlineEdit(props) {
   }, [isInputActive]);
 
   useEffect(() => {
+    console.log('effect isInputActive: ', isInputActive);
+
     if (isInputActive) {
       // if Enter is pressed, save the text and close the editor
       onEnter();
@@ -56,16 +60,19 @@ function InlineEdit(props) {
 
   const handleInputChange = useCallback(
     (event) => {
+      console.log('handleInputChange: ', event);
       // sanitize the input a little
       setInputValue(DOMPurify.sanitize(event.target.value));
     },
     [setInputValue]
   );
 
-  const handleSpanClick = useCallback(
-    () => setIsInputActive(true),
-    [setIsInputActive]
-  );
+  const handleSpanClick = () => {
+    if (props.text !== inputValue) {
+      setInputValue(props.text);
+    }
+    setIsInputActive(true);
+  };
 
   return (
     <span className="inline-text" ref={wrapperRef}>

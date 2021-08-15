@@ -7,6 +7,7 @@ import Header from '../components/Header';
 import Icon from '../components/Icon';
 import UserDataForm from '../components/UserDataForm';
 import MeditationForm from '../components/MeditationForm';
+import useInterval from '../hooks/useInterval';
 
 const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0');
 
@@ -20,15 +21,16 @@ const Stages = {
   IN_PROGRESS: 'IN_PROGRESS',
   COMPLETED: 'COMPLETED',
 };
+
 export default function CreateMeditation() {
   const [fileUrl, setFileUrl] = useState(null);
   const [stage, setStage] = useState(Stages.START);
   const [time, setTime] = useState(1);
+  const [isRunning, setIsRunning] = useState(false);
   const [initialTime, setInitialTime] = useState(600);
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [startTimeStamp, setStartTimeStamp] = useState('');
   const [endTimeStamp, setEndTimeStamp] = useState('');
-  const [clock, setClock] = useState(null);
   const [formInput, updateFormInput] = useState({
     price: '',
     name: '',
@@ -41,8 +43,21 @@ export default function CreateMeditation() {
     timeStamp: '',
   });
   const router = useRouter();
+  useInterval(
+    () => {
+      if (time - 1 <= 0) {
+        setEndTimeStamp(new Date().toISOString());
+        setIsRunning(false);
+        setTime(initialTime);
+        setStage(Stages.COMPLETED);
+      } else {
+        setTime((time) => time - 1);
+      }
+    },
+    isRunning ? 1000 : null
+  );
 
-  async function onChange(e) {
+  async function handleImageUpload(e) {
     const file = e.target.files[0];
     try {
       const added = await client.add(file, {
@@ -82,7 +97,6 @@ export default function CreateMeditation() {
     const provider = new ethers.providers.Web3Provider(connection);
     const signer = provider.getSigner();
 
-    debugger;
     /* next, create the item */
     let contract = new ethers.Contract(nftAddress, NFT.abi, signer);
     let transaction = await contract.createToken(url);
@@ -111,30 +125,14 @@ export default function CreateMeditation() {
     await transaction.wait();
     router.push('/');
   }
-
-  function tick() {
-    if (time - 1 <= 0) {
-      clearInterval(clock);
-      setClock(null);
-      setTime(0);
-      setStage(Stages.COMPLETED);
-      setEndTimeStamp(new Date().toISOString());
-    } else {
-      setTime((time) => time - 1);
-    }
-  }
-
   function startTimer() {
-    console.log('clock: ', clock);
-    if (clock) {
-      clearInterval(clock);
-      setClock(null);
+    if (isRunning) {
+      setIsRunning(false);
+      setTime(initialTime);
       return;
     }
     setStartTimeStamp(new Date().toISOString());
-    const newClock = setInterval(tick, 1000);
-    console.log('setting newClock: ', newClock);
-    setClock((clock) => newClock);
+    setIsRunning(true);
   }
 
   const secondsToMMSS = (time) => {
@@ -157,7 +155,7 @@ export default function CreateMeditation() {
             </div>
             <div className="flex items-center justify-evenly">
               <button
-                onClick={() => startTimer(clock)}
+                onClick={startTimer}
                 className="font-bold bg-green-400 text-white rounded-full py-3 px-6 shadow-lg"
               >
                 Start
@@ -182,6 +180,7 @@ export default function CreateMeditation() {
             startTimeStamp={startTimeStamp}
             endTimeStamp={endTimeStamp}
             duration={secondsToMMSS(initialTime)}
+            onImageUpload={handleImageUpload}
           />
         </div>
         <button

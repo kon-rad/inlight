@@ -2,21 +2,70 @@ import InlineEdit from './InlineEdit';
 import { useContext } from 'react';
 import { UserContext } from './userContext';
 import Icon from './Icon';
+import { useToasts } from 'react-toast-notifications';
 
 const UserDataForm = () => {
   const { user, setUser } = useContext(UserContext);
-  console.log('user: ', user, setUser);
+  const { addToast } = useToasts();
+
   const handleSetText = (key, val) => {
     const newUser = {
       ...user,
       [key]: val,
     };
-    setUser(newUser);
-    console.log('change newUser: ', newUser);
+    setUser((user) => ({
+      ...user,
+      [key]: val,
+    }));
+    console.log('handleSetText change newUser: ', newUser);
   };
-  const handleLocationUpdate = (e) => {
-    console.log('e: ', e);
+  const setLocation = () => {
+    navigator.geolocation.getCurrentPosition(function (position) {
+      console.log('Latitude is :', position.coords.latitude);
+      console.log('Longitude is :', position.coords.longitude);
+      console.log('position is :', position);
+      setUser((user) => ({
+        ...user,
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      }));
+    });
   };
+  const handleLocationUpdate = () => {
+    if ('geolocation' in navigator) {
+      navigator.permissions
+        .query({ name: 'geolocation' })
+        .then(function (result) {
+          if (result.state === 'granted') {
+            console.log(result.state);
+            setLocation();
+          } else if (result.state === 'prompt') {
+            console.log(result.state);
+          } else if (result.state === 'denied') {
+            //If denied then you have to show instructions to enable location
+            const content = (
+              <div>
+                Location permissions were denied.{' '}
+                <a
+                  target="_blank"
+                  href="https://support.google.com/chrome/answer/142065?hl=en&co=GENIE.Platform%3DDesktop"
+                >
+                  click here
+                </a>{' '}
+                for instructions on how to enable this in your browser.
+              </div>
+            );
+            addToast(content, {
+              appearance: 'error',
+              autoDismiss: false,
+            });
+          }
+        });
+    } else {
+      console.log('Not Available');
+    }
+  };
+  console.log('user latitude: ', user.latitude);
   return (
     <div className="mt-2">
       <div className="mb-2">
