@@ -4,7 +4,7 @@ const Nft = ({ i, nft, canBuy = false, buyNft }) => {
   console.log('nft: ', nft);
   return (
     <div
-      key={i}
+      key={i + nft.seller}
       className="border shadow rounded-xl overflow-hidden mb-4 mt-2 flex"
     >
       <div className="w-28 h-28 overflow-hidden">

@@ -24,12 +24,13 @@ const Stages = {
   IN_PROGRESS: 'IN_PROGRESS',
   COMPLETED: 'COMPLETED',
 };
+const useIPFS = true;
 
 export default function CreateMeditation() {
   const { user, setUser } = useContext(UserContext);
   const [fileUrl, setFileUrl] = useState(null);
   const [stage, setStage] = useState(Stages.START);
-  const [time, setTime] = useState(1);
+  const [time, setTime] = useState(600);
   const [isRunning, setIsRunning] = useState(false);
   const [initialTime, setInitialTime] = useState(600);
   const [timeElapsed, setTimeElapsed] = useState(0);
@@ -54,7 +55,7 @@ export default function CreateMeditation() {
   const router = useRouter();
   useInterval(
     () => {
-      if (time - 1 <= 0) {
+      if (time - 1 <= 0 || time < 592) {
         setMeditationData((data) => ({
           ...data,
           endTimeStamp: new Date().toISOString(),
@@ -79,17 +80,21 @@ export default function CreateMeditation() {
     }
     const file = e.target.files[0];
     try {
-      const added = await client.add(file, {
-        progress: (prog) => console.log(`received: ${prog}`),
-      });
-      const url = `https://ipfs.infura.io/ipfs/${added.path}`;
-      setFileUrl(url);
-      setFileUpload(file);
+      // nft.storage was returning 500 type error - it was reported on discord that it was down
+      if (useIPFS) {
+        const added = await client.add(file, {
+          progress: (prog) => console.log(`received: ${prog}`),
+        });
+        const url = `https://ipfs.infura.io/ipfs/${added.path}`;
+        setFileUrl(url);
+        setFileUpload(file);
+      }
     } catch (error) {
       console.log(`Error uploading file: ${error}`);
     }
   }
   async function createMarket() {
+    debugger;
     const { firstName, lastName } = user;
     const { price } = meditationData;
     if (!firstName || !lastName || !price) {
@@ -97,26 +102,26 @@ export default function CreateMeditation() {
     }
     const imageData = fileUrl ? fileUrl : meditationData.avatarBase64;
 
-    /* first, upload to IPFS */
-    // const data = JSON.stringify({
-    //   ...user,
-    //   ...meditationData,
-    //   image: imageData,
-    // });
-
     try {
-      const metadata = storeNft({
-        name: user.firstName + ' meditation',
-        ...user,
-        ...meditationData,
-        image: fileUpload,
-      });
-      console.log('meta: ', metadata);
-      // const added = await client.add(data);
-      const url = `https://ipfs.infura.io/ipfs/${metadata.url}`;
-      /* after file is uploaded to nftStorage, pass the URL to save it on blockchain */
-      createSale(url);
-      console.log('ipfs url: ', url);
+      /* first, upload to IPFS */
+      if (useIPFS) {
+        const data = JSON.stringify({
+          ...user,
+          ...meditationData,
+          image: imageData,
+        });
+        const added = await client.add(data);
+        const url = `https://ipfs.infura.io/ipfs/${added.path}`;
+        /* after file is uploaded to nftStorage, pass the URL to save it on blockchain */
+        createSale(url);
+      } else {
+        const metadata = await storeNft({
+          name: user.firstName + ' meditation',
+          ...user,
+          ...meditationData,
+          image: fileUpload,
+        });
+      }
     } catch (error) {
       console.log(`Error uploading file: ${error}`);
     }

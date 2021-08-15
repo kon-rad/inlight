@@ -1,11 +1,10 @@
 import { NFTStorage, File } from 'nft.storage';
 
 export function getAccessToken() {
-  return process.env.NFT_STORAGE_APIKEY;
+  return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweGQzMTYyM2VhMDQwY0Q5RTkyNWQ5NDI4MjJFMGU3ZDg4QTRDMUY5NWMiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTYyOTA0NzA2NDE4MSwibmFtZSI6ImlubGlnaHRNZWRpdGF0aW9uIn0.p0zdbObm_MDFvxM83UDrT_BfmYjtO5CxWD4LHvrvvPw';
 }
 
 export function makeStorageClient() {
-  console.log('getAccessToken(): ', getAccessToken());
   return new NFTStorage({ token: getAccessToken() });
 }
 

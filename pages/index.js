@@ -30,6 +30,11 @@ export default function Home() {
 
     const getItem = async (i) => {
       const tokenUri = await tokenContract.tokenURI(i.tokenId);
+      debugger;
+      if (/undefined/.test(tokenUri)) {
+        debugger;
+        return;
+      }
       const meta = await axios.get(tokenUri);
       let price = ethers.utils.formatUnits(i.price.toString(), 'ether');
       const item = {
@@ -82,9 +87,10 @@ export default function Home() {
       </h1>
       <Header icon="store" title="Store" />
       <div className="flex flex-col align-center pt-4 px-4">
-        {nfts.map((nft, i) => (
-          <Nft canBuy={true} i={i} nft={nft} buyNft={buyNft} />
-        ))}
+        {nfts.map(
+          (nft, i) =>
+            nft && <Nft canBuy={true} i={i} nft={nft} buyNft={buyNft} />
+        )}
       </div>
     </div>
   );
