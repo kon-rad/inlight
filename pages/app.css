@@ -2,6 +2,13 @@
 .navigation  {
   background: white;
 }
+.navigation__link {
+  border-radius: 50%;
+  padding: 12px;
+}
+.navigation__link--active {
+  background-color: #fde68aa8;
+}
 .header__icon {
   width: 100px;
   height: 100px;
@@ -25,6 +32,12 @@
   }
   .navigation div {
     flex-grow: 1;
+  }
+  .listMenu {
+    position: fixed;
+    bottom: 90px;
+    right: 0;
+    left: 0;
   }
 }
 

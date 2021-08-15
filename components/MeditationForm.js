@@ -11,20 +11,25 @@ const MeditationForm = ({
   endTimeStamp,
   onImageUpload,
   fileUrl,
+  meditationData,
+  onMeditationDataChange,
 }) => {
   const [desc, setDesc] = useState('');
   const [avatar, setAvatar] = useState(null);
   const [avatarImage, setAvatarImage] = useState(null);
+  const [useGenerated, setUseGenerated] = useState(true);
   const { user, setUser } = useContext(UserContext);
+  useEffect(() => {
+    if (fileUrl) {
+      setUseGenerated(false);
+    }
+  }, [fileUrl]);
   const handleSetText = (key, val) => {
     const newUser = {
       ...user,
       [key]: val,
     };
     setUser(newUser);
-  };
-  const handleChangeDescription = (e) => {
-    setDesc(e.target.value);
   };
   useEffect(() => {
     let newAvatar = generateAvatar({
@@ -37,15 +42,21 @@ const MeditationForm = ({
     });
     setAvatar(newAvatar);
     setAvatarImage(image);
+    onMeditationDataChange('avatarBase64', newAvatar.base64);
   }, []);
   const renderImage = () => {
     if (fileUrl) {
       return <img className="rounded mt-4" width="350" src={fileUrl} />;
     }
-    return avatarImage;
+    return useGenerated && avatarImage;
   };
-  const useGenerated = () => {
-    onImageUpload(null);
+  const handelUseGenerated = (event) => {
+    if (!event.target.checked) {
+      setUseGenerated(false);
+    } else {
+      onImageUpload(null);
+      setUseGenerated(true);
+    }
   };
   return (
     <div className="mt-2">
@@ -54,28 +65,41 @@ const MeditationForm = ({
         <div className="flex flex-col">
           <div className="flex mb-1">
             <div className="text-sm bold mr-2">Duration:</div>
-            <div className="text-sm">{duration}</div>
+            <div className="text-sm">{meditationData.duration}</div>
           </div>
           <div className="flex mb-1">
             <div className="text-sm bold mr-2">Start Time Stamp:</div>
-            <div className="text-xs">{formatDate(startTimeStamp)}</div>
+            <div className="text-xs">
+              {formatDate(meditationData.startTimeStamp)}
+            </div>
           </div>
           <div className="flex mb-1">
             <div className="text-sm bold mr-2">End Time Stamp:</div>
-            <div className="text-xs">{formatDate(endTimeStamp)}</div>
+            <div className="text-xs">
+              {formatDate(meditationData.endTimeStamp)}
+            </div>
           </div>
           <div className="flex mb-1 flex-col">
             <div className="text-sm bold mr-2">Description:</div>
             <textarea
-              value={desc}
-              onChange={handleChangeDescription}
+              value={meditationData.description}
+              onChange={(e) =>
+                onMeditationDataChange('description', e.target.value)
+              }
               className="MeditationForm__description rounded border mb-2 p-2 text-sm"
               placeholder="Any observations or notes?"
             />
           </div>
+          <div className="flex mb-1">
+            <div className="text-sm bold mr-2">Price (ETH):</div>
+            <InlineEdit
+              text={meditationData.price}
+              onSetText={(val) => onMeditationDataChange('price', val)}
+            />
+          </div>
           <div className="flex flex-col mb-1">
             <div className="flex justify-between mb-2">
-              <div className="flex flex-col">
+              <div className="flex flex-col overflow-hidden">
                 <div className="text-sm bold mr-2">Image:</div>
                 <div className="text-xs text-gray-400 ">
                   It can be an image of your meditation space or anything you
@@ -84,15 +108,19 @@ const MeditationForm = ({
                 <input
                   type="file"
                   name="Asset"
-                  className="self-start mt-2"
+                  className="mr-2"
                   onChange={onImageUpload}
                 />
-                <button
-                  className="mt-2 bg-white text-black border-black border rounded-full py-1 px-4 shadow-lg self-start"
-                  onClick={useGenerated}
-                >
+                <label className="mt-2 ">
+                  <input
+                    type="checkbox"
+                    name="useGenerated"
+                    onChange={handelUseGenerated}
+                    className="mr-2"
+                    checked={useGenerated}
+                  />
                   use generated image
-                </button>
+                </label>
               </div>
             </div>
             {renderImage()}

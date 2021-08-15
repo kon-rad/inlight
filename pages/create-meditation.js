@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
+import { UserContext } from '../components/userContext';
 import { ethers } from 'ethers';
 import { create as ipfsHttpClient } from 'ipfs-http-client';
 import { useRouter } from 'next/router';
@@ -15,6 +16,7 @@ import { nftAddress, nftMarketAddress } from '../config';
 
 import NFT from '../artifacts/contracts/InLightNFT.sol/InLightNFT.json';
 import Market from '../artifacts/contracts/InLightMarket.sol/InLightMarket.json';
+import { data } from 'autoprefixer';
 
 const Stages = {
   START: 'START',
@@ -23,17 +25,14 @@ const Stages = {
 };
 
 export default function CreateMeditation() {
+  const { user, setUser } = useContext(UserContext);
   const [fileUrl, setFileUrl] = useState(null);
   const [stage, setStage] = useState(Stages.START);
   const [time, setTime] = useState(1);
   const [isRunning, setIsRunning] = useState(false);
   const [initialTime, setInitialTime] = useState(600);
   const [timeElapsed, setTimeElapsed] = useState(0);
-  const [startTimeStamp, setStartTimeStamp] = useState('');
-  const [endTimeStamp, setEndTimeStamp] = useState('');
   const [formInput, updateFormInput] = useState({
-    price: '',
-    name: '',
     description: '',
     firstName: '',
     lastName: '',
@@ -42,11 +41,24 @@ export default function CreateMeditation() {
     longitude: '',
     timeStamp: '',
   });
+  const [meditationData, setMeditationData] = useState({
+    duration: '',
+    startTimeStamp: '',
+    endTimeStamp: '',
+    price: '',
+    avatarBase64: '',
+  });
   const router = useRouter();
   useInterval(
     () => {
       if (time - 1 <= 0) {
-        setEndTimeStamp(new Date().toISOString());
+        setMeditationData((data) => ({
+          ...data,
+          endTimeStamp: new Date().toISOString(),
+          duration: secondsToMMSS(initialTime),
+          // set default price to 0.1 ETH per minute
+          price: String((initialTime / 60) * 0.1),
+        }));
         setIsRunning(false);
         setTime(initialTime);
         setStage(Stages.COMPLETED);
@@ -74,15 +86,18 @@ export default function CreateMeditation() {
     }
   }
   async function createMarket() {
-    const { name, description, price } = formInput;
-    if (!name || !description || !price || !fileUrl) {
+    const { firstName, lastName } = user;
+    const { price } = meditationData;
+    if (!firstName || !lastName || !price) {
       return;
     }
+    const imageData = fileUrl ? fileUrl : meditationData.avatarBase64;
+
     /* first, upload to IPFS */
     const data = JSON.stringify({
-      name,
-      description,
-      image: fileUrl,
+      ...user,
+      ...meditationData,
+      image: imageData,
     });
 
     try {
@@ -90,6 +105,7 @@ export default function CreateMeditation() {
       const url = `https://ipfs.infura.io/ipfs/${added.path}`;
       /* after file is uploaded to IPFS, pass the URL to save it on blockchain */
       createSale(url);
+      console.log('ipfs url: ', url);
     } catch (error) {
       console.log(`Error uploading file: ${error}`);
     }
@@ -110,13 +126,10 @@ export default function CreateMeditation() {
       return;
     }
     const event = tx.events[0];
-    console.log('tx: ', tx);
-    console.log('tx.events: ', tx.events);
-    console.log('event: ', event);
     const value = event.args[2];
     const tokenId = value.toNumber();
 
-    const price = ethers.utils.parseUnits(formInput.price, 'ether');
+    const price = ethers.utils.parseUnits(meditationData.price, 'ether');
 
     /* then list the item for sale on the marketplace */
     contract = new ethers.Contract(nftMarketAddress, Market.abi, signer);
@@ -135,7 +148,10 @@ export default function CreateMeditation() {
       setTime(initialTime);
       return;
     }
-    setStartTimeStamp(new Date().toISOString());
+    setMeditationData((data) => ({
+      ...data,
+      startTimeStamp: new Date().toISOString(),
+    }));
     setIsRunning(true);
   }
 
@@ -146,31 +162,10 @@ export default function CreateMeditation() {
     return `${m}:${s}`;
   };
 
-  if (stage === Stages.START) {
-    return (
-      <div>
-        <Header icon="meditate" title="Meditate" />
-        <div className="flex justify-center">
-          <div className="w-1/2 flex flex-col pb-12">
-            <div className="timer flex justify-center items-center">
-              <span className="timer__time text-4xl font-bold text-center">
-                {secondsToMMSS(time)}
-              </span>
-            </div>
-            <div className="flex items-center justify-evenly">
-              <button
-                onClick={startTimer}
-                className="font-bold bg-green-400 text-white rounded-full py-3 px-6 shadow-lg"
-              >
-                Start
-              </button>
-              <Icon name="volume-up" />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const handleMeditationDataChange = (key, val) => {
+    setMeditationData((data) => ({ ...data, [key]: val }));
+  };
+
   if (stage === Stages.COMPLETED) {
     return (
       <div className="flex flex-col p-5">
@@ -186,11 +181,10 @@ export default function CreateMeditation() {
         <div className="p-4 mt-3">
           <UserDataForm />
           <MeditationForm
-            startTimeStamp={startTimeStamp}
-            endTimeStamp={endTimeStamp}
-            duration={secondsToMMSS(initialTime)}
             onImageUpload={handleImageUpload}
             fileUrl={fileUrl}
+            meditationData={meditationData}
+            onMeditationDataChange={handleMeditationDataChange}
           />
         </div>
         <button
@@ -203,38 +197,25 @@ export default function CreateMeditation() {
     );
   }
   return (
-    <div className="flex justify-center">
-      <div className="w-1/2 flex flex-col pb-12">
-        <input
-          type="text"
-          placeholder="Asset Name"
-          className="mt-8 border rounded p-4"
-          onChange={(e) =>
-            updateFormInput({ ...formInput, name: e.target.value })
-          }
-        />
-        <textarea
-          type="text"
-          placeholder="Asset Description"
-          className="mt-2 border rounded p-4"
-          onChange={(e) =>
-            updateFormInput({ ...formInput, description: e.target.value })
-          }
-        />
-        <input
-          type="text"
-          placeholder="Asset Price in Eth"
-          className="mt-2 border rounded p-4"
-          onChange={(e) =>
-            updateFormInput({ ...formInput, price: e.target.value })
-          }
-        />
-        <button
-          onClick={createMarket}
-          className="font-bold mt-4 bg-green-400 text-white rounded p-4 shadow-lg"
-        >
-          Create Digital Asset
-        </button>
+    <div>
+      <Header icon="meditate" title="Meditate" />
+      <div className="flex justify-center">
+        <div className="w-1/2 flex flex-col pb-12">
+          <div className="timer flex justify-center items-center">
+            <span className="timer__time text-4xl font-bold text-center">
+              {secondsToMMSS(time)}
+            </span>
+          </div>
+          <div className="flex items-center justify-evenly">
+            <button
+              onClick={startTimer}
+              className="font-bold bg-green-400 text-white rounded-full py-3 px-6 shadow-lg"
+            >
+              Start
+            </button>
+            <Icon name="volume-up" />
+          </div>
+        </div>
       </div>
     </div>
   );

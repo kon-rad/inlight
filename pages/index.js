@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Web3Modal from 'web3modal';
 import Header from '../components/Header';
+import Nft from '../components/Nft';
 
 import { nftAddress, nftMarketAddress } from '../config';
 
@@ -70,45 +71,19 @@ export default function Home() {
     await transaction.wait();
     loadNFTs();
   }
-  if (loadingState === 'loaded' && !nfts.length) {
-    return <h1 className="px-20 py-10 text-3xl">No items in marketplace</h1>;
-  }
+  // if (loadingState === 'loaded' && !nfts.length) {
+  //   return <h1 className="px-20 py-10 text-3xl">No items in marketplace</h1>;
+  // }
   return (
     <div>
       <h1 className="my-3 text-4xl font-bold text-center">
         InLight Meditation
       </h1>
       <Header icon="store" title="Store" />
-      <div className="flex justify-center">
-        <div className="px-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
-            {nfts.map((nft, i) => (
-              <div
-                key={i}
-                className="border shadow rounded-xl overflow-hidden mb-4 mt-2"
-              >
-                <img src={nft.image} alt="" />
-                <div className="p-4">
-                  <p className="text-2xl font-semibold">{nft.name}</p>
-                  <div>
-                    <p className="text-gray-400">{nft.description}</p>
-                  </div>
-                </div>
-                <div className="p-4 bg-black">
-                  <p className="text-2xl mb-4 font-bold text-white">
-                    {nft.price} ETH
-                  </p>
-                  <button
-                    className="w-full bg-green-400 text-white font-bold py-2 px-12 rounded"
-                    onClick={() => buyNft(nft)}
-                  >
-                    Buy
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      <div className="flex flex-col align-center pt-4 px-4">
+        {nfts.map((nft, i) => (
+          <Nft canBuy={true} key={i} nft={nft} buyNft={buyNft} />
+        ))}
       </div>
     </div>
   );

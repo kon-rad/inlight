@@ -17,13 +17,9 @@ const UserDataForm = () => {
       ...user,
       [key]: val,
     }));
-    console.log('handleSetText change newUser: ', newUser);
   };
   const setLocation = () => {
     navigator.geolocation.getCurrentPosition(function (position) {
-      console.log('Latitude is :', position.coords.latitude);
-      console.log('Longitude is :', position.coords.longitude);
-      console.log('position is :', position);
       setUser((user) => ({
         ...user,
         latitude: position.coords.latitude,
@@ -62,7 +58,16 @@ const UserDataForm = () => {
           }
         });
     } else {
-      console.log('Not Available');
+      const content = (
+        <div>
+          Location detection is not available in your browser. Please try again
+          using Chrome.
+        </div>
+      );
+      addToast(content, {
+        appearance: 'error',
+        autoDismiss: false,
+      });
     }
   };
   return (

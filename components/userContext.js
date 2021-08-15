@@ -1,13 +1,10 @@
 import React, { createContext } from 'react';
 
 export const userState = {
-  name: '',
   firstName: '',
   lastName: '',
-  address: '',
   latitude: '',
   longitude: '',
-  meditationsCount: '',
   setUser: () => {},
 };
 

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Web3Modal from 'web3Modal';
 import Header from '../components/Header';
+import UserDataForm from '../components/UserDataForm';
 
 import { nftMarketAddress, nftAddress } from '../config';
 
@@ -56,48 +57,14 @@ export default function MeditationDashboard() {
     setNfts(items);
     setLoadingState('loaded');
   }
-  if (loadingState === 'loaded' && !nfts.length) {
-    return <h1 className="py-10 px-20 text-3xl">No assets created</h1>;
-  }
+  // if (loadingState === 'loaded' && !nfts.length) {
+  //   return <h1 className="py-10 px-20 text-3xl">No assets created</h1>;
+  // }
   return (
     <div>
       <div className="p-4">
         <Header icon="user" title="Profile" />
-        <h2 className="text-2xl py-2">Items Created</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
-          {nfts.map((nft, i) => (
-            <div key={i} className="border shadow rounded-xl overflow-hidden">
-              <img src={nft.image} alt="" className="rounded" />
-              <div className="p-4 bg-black">
-                <p className="text-2xl font-bold text-white">
-                  Price - {nft.price} Eth
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="px-4">
-        {Boolean(sold.length) && (
-          <div>
-            <h2 className="text-2xl py-2">Items Sold</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
-              {sold.map((nft, i) => (
-                <div
-                  key={i}
-                  className="border shadow rounded-xl overflow-hidden"
-                >
-                  <img src={nft.image} alt="" className="rounded" />
-                  <div className="p-4 bg-black">
-                    <p className="text-2xl font-bold text-white">
-                      Price - {nft.price} Eth
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        <UserDataForm />
       </div>
     </div>
   );
