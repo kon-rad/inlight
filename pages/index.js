@@ -16,7 +16,6 @@ export default function Home() {
   useEffect(() => {
     loadNFTs();
   }, []);
-
   async function loadNFTs() {
     /* create a generic provider and query for unsold market items */
     const provider = new ethers.providers.JsonRpcProvider();
@@ -29,27 +28,29 @@ export default function Home() {
     const data = await marketContract.fetchMarketItems();
     console.log('data: ', data);
 
+    const getItem = async (i) => {
+      const tokenUri = await tokenContract.tokenURI(i.tokenId);
+      const meta = await axios.get(tokenUri);
+      let price = ethers.utils.formatUnits(i.price.toString(), 'ether');
+      const item = {
+        price,
+        tokenId: i.tokenId.toNumber(),
+        seller: i.seller,
+        owner: i.owner,
+        sold: i.sold,
+        image: meta.data.image,
+        startTimeStamp: meta.data.startTimeStamp,
+        duration: meta.data.duration,
+        description: meta.data.description,
+      };
+      console.log('item: ', meta);
+      return item;
+    };
+
     /* map over items returned from smart contract and format
      * them as  well as fetch their token metadata
      */
-    const items = await Promise.all(
-      (data || []).map(async (i) => {
-        const tokenUri = await tokenContract.tokenURI(i.tokenId);
-        const meta = await axios.get(tokenUri);
-        const price = ethers.utils.formatUnits(i.price.toString(), 'ether');
-        console.log('meta: ', meta);
-        const item = {
-          price,
-          tokenId: i.tokenId.toNumber(),
-          seller: i.seller,
-          owner: i.owner,
-          image: meta.data.image,
-          name: meta.data.name,
-          description: meta.data.description,
-        };
-        return item;
-      })
-    );
+    const items = await Promise.all((data || []).map(getItem));
     setNfts(items);
     setLoadingState('loaded');
   }
@@ -82,7 +83,7 @@ export default function Home() {
       <Header icon="store" title="Store" />
       <div className="flex flex-col align-center pt-4 px-4">
         {nfts.map((nft, i) => (
-          <Nft canBuy={true} key={i} nft={nft} buyNft={buyNft} />
+          <Nft canBuy={true} i={i} nft={nft} buyNft={buyNft} />
         ))}
       </div>
     </div>

@@ -9,6 +9,7 @@ import Icon from '../components/Icon';
 import UserDataForm from '../components/UserDataForm';
 import MeditationForm from '../components/MeditationForm';
 import useInterval from '../hooks/useInterval';
+import { storeNft } from '../utilities/nftStorage';
 
 const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0');
 
@@ -32,6 +33,7 @@ export default function CreateMeditation() {
   const [isRunning, setIsRunning] = useState(false);
   const [initialTime, setInitialTime] = useState(600);
   const [timeElapsed, setTimeElapsed] = useState(0);
+  const [fileUpload, setFileUpload] = useState();
   const [formInput, updateFormInput] = useState({
     description: '',
     firstName: '',
@@ -47,6 +49,7 @@ export default function CreateMeditation() {
     endTimeStamp: '',
     price: '',
     avatarBase64: '',
+    description: '',
   });
   const router = useRouter();
   useInterval(
@@ -81,6 +84,7 @@ export default function CreateMeditation() {
       });
       const url = `https://ipfs.infura.io/ipfs/${added.path}`;
       setFileUrl(url);
+      setFileUpload(file);
     } catch (error) {
       console.log(`Error uploading file: ${error}`);
     }
@@ -94,16 +98,23 @@ export default function CreateMeditation() {
     const imageData = fileUrl ? fileUrl : meditationData.avatarBase64;
 
     /* first, upload to IPFS */
-    const data = JSON.stringify({
-      ...user,
-      ...meditationData,
-      image: imageData,
-    });
+    // const data = JSON.stringify({
+    //   ...user,
+    //   ...meditationData,
+    //   image: imageData,
+    // });
 
     try {
-      const added = await client.add(data);
-      const url = `https://ipfs.infura.io/ipfs/${added.path}`;
-      /* after file is uploaded to IPFS, pass the URL to save it on blockchain */
+      const metadata = storeNft({
+        name: user.firstName + ' meditation',
+        ...user,
+        ...meditationData,
+        image: fileUpload,
+      });
+      console.log('meta: ', metadata);
+      // const added = await client.add(data);
+      const url = `https://ipfs.infura.io/ipfs/${metadata.url}`;
+      /* after file is uploaded to nftStorage, pass the URL to save it on blockchain */
       createSale(url);
       console.log('ipfs url: ', url);
     } catch (error) {
