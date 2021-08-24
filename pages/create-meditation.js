@@ -94,7 +94,6 @@ export default function CreateMeditation() {
     }
   }
   async function createMarket() {
-    debugger;
     const { firstName, lastName } = user;
     const { price } = meditationData;
     if (!firstName || !lastName || !price) {

@@ -30,9 +30,7 @@ export default function Home() {
 
     const getItem = async (i) => {
       const tokenUri = await tokenContract.tokenURI(i.tokenId);
-      debugger;
       if (/undefined/.test(tokenUri)) {
-        debugger;
         return;
       }
       const meta = await axios.get(tokenUri);

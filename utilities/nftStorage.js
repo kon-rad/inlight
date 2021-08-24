@@ -9,7 +9,6 @@ export function makeStorageClient() {
 }
 
 export const storeNft = async (file) => {
-  debugger;
   const client = makeStorageClient();
   const metadata = await client.store({
     ...file,

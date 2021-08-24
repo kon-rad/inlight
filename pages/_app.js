@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Icon from '../components/Icon';
 import { UserProvider, userState } from '../components/userContext';
@@ -11,7 +11,6 @@ import './app.css';
 function MyApp({ Component, pageProps, router }) {
   const [user, setUser] = useLocalStorage('inLightMeditationUser', userState);
 
-  console.log(router.pathname);
   return (
     <UserProvider value={{ user, setUser }}>
       <ToastProvider>
